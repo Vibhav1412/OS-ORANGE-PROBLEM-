@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+sem_t orange;
+
+void* person(void* arg) {
+    int id = *(int*)arg;
+
+    printf("Person %d is waiting for orange\n", id);
+
+    sem_wait(&orange); // take resource
+
+    printf("Person %d got the orange 🍊\n", id);
+    sleep(2);
+
+    printf("Person %d released the orange\n", id);
+
+    sem_post(&orange); // release resource
+
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+    int id1 = 1, id2 = 2;
+
+    sem_init(&orange, 0, 1); // only 1 orange
+
+    pthread_create(&t1, NULL, person, &id1);
+    pthread_create(&t2, NULL, person, &id2);
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    sem_destroy(&orange);
+
+    return 0;
+}
